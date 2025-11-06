@@ -84,6 +84,51 @@ join project p on a.pno=p.pno
 where d.dloc =p.ploc; 
 
 
+SELECT e.ename AS manager_name
+FROM employee e
+JOIN employee m ON e.empno = m.mgr_no
+GROUP BY e.empno, e.ename
+HAVING COUNT(m.empno) =
+(
+    SELECT MAX(cnt)
+    FROM (
+        SELECT COUNT(*) AS cnt
+        FROM employee
+        WHERE mgr_no IS NOT NULL
+        GROUP BY mgr_no
+    ) AS t
+);
+
+SELECT m.empno, m.ename, m.sal
+FROM employee m
+JOIN employee e ON e.mgr_no = m.empno
+GROUP BY m.empno, m.ename, m.sal
+HAVING m.sal > AVG(e.sal);
+
+SELECT d.deptno, e2.empno, e2.ename
+FROM dept d
+JOIN employee e1 ON d.deptno = e1.deptno AND e1.mgr_no IS NULL
+JOIN employee e2 ON e2.mgr_no = e1.empno;
+
+SELECT e.*
+FROM employee e
+JOIN incentives i ON e.empno = i.empno
+WHERE i.incentive_amount =
+(
+    SELECT DISTINCT incentive_amount
+    FROM incentives
+    WHERE MONTH(incentive_date)=1 AND YEAR(incentive_date)=2019
+    ORDER BY incentive_amount DESC
+    LIMIT 1 OFFSET 1
+);
+
+SELECT e.empno, e.ename, d.dname
+FROM employee e
+JOIN employee m ON e.mgr_no = m.empno
+JOIN dept d ON e.deptno = d.deptno
+WHERE e.deptno = m.deptno;
+
+
 
 
     
