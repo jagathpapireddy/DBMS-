@@ -43,11 +43,11 @@ insert into dept values
 
 insert into employee values
 	(1, 'arun',null,'2020-01-01',50000,10),
-    (2,'bhargav',1,'2019-03-15',55000,20),
+    (2,'bhargav',1,'2019-03-15',60000,20),
     (3,'chandra',2,'2021-06-20',60000,30),
     (4,'divya',2,'2022-08-10',48000,30),
     (5,'eshan',3,'2018-11-01',70000,40),
-    (6,'finch',2,'2023-04-05',62000,50);
+    (6,'finch',2,'2023-04-05',62000,20);
 
 insert into project values
 	(101, 'payroll system','bengaluru'),
@@ -65,8 +65,8 @@ insert into assignedto values
     (6,105,'chennai');
 
 insert into incentives values
-	(1,'2024-01-15',2000),
-    (3,'2024-03-10',2000),
+	(1,'2019-01-15',2000),
+    (3,'2019-01-10',1000),
     (5,'2024-02-20',2500);
 
 select e.empno from employee e
@@ -83,55 +83,40 @@ join assignedto a on e.empno=a.empno
 join project p on a.pno=p.pno
 where d.dloc =p.ploc; 
 
+select e.ename as manager_name from employee e
+join employee m on e.empno=m.mgr_no
+group by e.ename,e.empno
+having count(m.empno)= (select max(cnt) from 
+                     (select count(*) as cnt from employee 
+                                group by mgr_no)as t);
+								
 
-SELECT e.ename AS manager_name
-FROM employee e
-JOIN employee m ON e.empno = m.mgr_no
-GROUP BY e.empno, e.ename
-HAVING COUNT(m.empno) =
-(
-    SELECT MAX(cnt)
-    FROM (
-        SELECT COUNT(*) AS cnt
-        FROM employee
-        WHERE mgr_no IS NOT NULL
-        GROUP BY mgr_no
-    ) AS t
-);
+select m.empno,m.ename,m.sal from  employee m 
+join employee e on e.mgr_no=m.empno
+group by m.empno, m.ename, m.sal 
+having m.sal> avg(e.sal);
 
-SELECT m.empno, m.ename, m.sal
-FROM employee m
-JOIN employee e ON e.mgr_no = m.empno
-GROUP BY m.empno, m.ename, m.sal
-HAVING m.sal > AVG(e.sal);
 
-SELECT d.deptno, e2.empno, e2.ename
-FROM dept d
-JOIN employee e1 ON d.deptno = e1.deptno AND e1.mgr_no IS NULL
-JOIN employee e2 ON e2.mgr_no = e1.empno;
+select d.deptno,e.empno,e.ename from dept d
+join employee e1 on d.deptno=e1.deptno and e1.mgr_no is null
+join employee e on e.mgr_no=e1.empno;
 
-SELECT e.*
-FROM employee e
-JOIN incentives i ON e.empno = i.empno
-WHERE i.incentive_amount =
-(
-    SELECT DISTINCT incentive_amount
-    FROM incentives
-    WHERE MONTH(incentive_date)=1 AND YEAR(incentive_date)=2019
-    ORDER BY incentive_amount DESC
-    LIMIT 1 OFFSET 1
-);
+select e.* from employee e
+join incentives i on e.empno=i.empno
+where i.incentive_amount=
+(select distinct incentive_amount from incentives 
+where year(incentive_date)=2019 and month(incentive_date)=1
+order by incentive_amount desc
+limit 1 offset 1);
 
-SELECT e.empno, e.ename, d.dname
-FROM employee e
-JOIN employee m ON e.mgr_no = m.empno
-JOIN dept d ON e.deptno = d.deptno
-WHERE e.deptno = m.deptno;
+
+select e.empno, e.ename, d.dname
+from employee e
+join employee m on e.mgr_no = m.empno
+join dept d on e.deptno = d.deptno
+where e.deptno = m.deptno;
 
 
 
-
-    
-	  
     
         
